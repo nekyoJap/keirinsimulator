@@ -77,15 +77,17 @@
             });
         });
 
-          canvas.addEventListener('touchmove', function(event) {
+        canvas.addEventListener('touchmove', function(event) {
             event.preventDefault();
             if (draggingRacer) {
                 const touch = event.touches[0];
+                // 駒の位置を直接更新
                 draggingRacer.x = touch.clientX / window.innerWidth * originalCanvasWidth;
                 draggingRacer.y = touch.clientY / window.innerHeight * originalCanvasHeight;
-                drawRacers();
+                drawRacers(); // 駒を再描画
             }
-            });
+        });
+
 
 
         canvas.addEventListener('touchend', function() {
