@@ -77,15 +77,16 @@
             });
         });
 
-        canvas.addEventListener('touchmove', function(event) {
+          canvas.addEventListener('touchmove', function(event) {
             event.preventDefault();
             if (draggingRacer) {
                 const touch = event.touches[0];
-                draggingRacer.x = touch.clientX;
-                draggingRacer.y = touch.clientY;
+                draggingRacer.x = touch.clientX / window.innerWidth * originalCanvasWidth;
+                draggingRacer.y = touch.clientY / window.innerHeight * originalCanvasHeight;
                 drawRacers();
             }
-        });
+            });
+
 
         canvas.addEventListener('touchend', function() {
             draggingRacer = null;
