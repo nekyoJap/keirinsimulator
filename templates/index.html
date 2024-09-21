@@ -62,8 +62,9 @@
 
         canvas.addEventListener('touchstart', function(event) {
             const touch = event.touches[0];
-            const touchX = touch.clientX;
-            const touchY = touch.clientY;
+            const touchX = touch.clientX / window.innerWidth * originalCanvasWidth;
+            const touchY = touch.clientY / window.innerHeight * originalCanvasHeight;
+
 
             // タッチ位置と駒の位置をチェック
             racers.forEach(racer => {
