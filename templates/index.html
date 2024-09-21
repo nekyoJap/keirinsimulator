@@ -37,6 +37,9 @@
 
         // 駒を描画
       function drawRacers() {
+        const originalCanvasWidth = 1920;
+        const originalCanvasHeight = 1080;
+
         ctx.drawImage(trackImage, 0, 0, canvas.width, canvas.height);
     
         racers.forEach(racer => {
