@@ -17,6 +17,9 @@
 <body>
     <canvas id="racetrack"></canvas>
     <script>
+        const originalCanvasWidth = 1920;
+        const originalCanvasHeight = 1080;
+
         const racers = {{ racers | tojson }};
         const canvas = document.getElementById('racetrack');
         const ctx = canvas.getContext('2d');
@@ -37,8 +40,6 @@
 
         // 駒を描画
       function drawRacers() {
-        const originalCanvasWidth = 1920;
-        const originalCanvasHeight = 1080;
 
         ctx.drawImage(trackImage, 0, 0, canvas.width, canvas.height);
     
