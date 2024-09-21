@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>競輪場のシミュレーション</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="racetrack"></canvas>
+    <script>
+        const racers = {{ racers | tojson }};
+        const canvas = document.getElementById('racetrack');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // 競輪場のトラック画像を読み込む
+        const trackImage = new Image();
+        trackImage.src = '/static/keirin_track.gif';  // トラック画像のパスを設定
+        trackImage.onload = function() {
+            drawRacers();  // 画像がロードされた後に描画
+        };
+
+        // 駒を描画
+        function drawRacers() {
+            // 競輪場のトラック画像を背景に描画
+            ctx.drawImage(trackImage, 0, 0, canvas.width, canvas.height);
+
+            // 駒を描画
+            racers.forEach(racer => {
+                ctx.beginPath();
+                ctx.arc(racer.x, racer.y, 20, 0, Math.PI * 2);
+                ctx.fillStyle = racer.color;
+                ctx.fill();
+                ctx.closePath();
+                ctx.fillStyle = 'black';
+                ctx.fillText(racer.number, racer.x - 5, racer.y + 5);
+            });
+        }
+
+        // タッチイベントの処理
+        let draggingRacer = null;
+
+        canvas.addEventListener('touchstart', function(event) {
+            const touch = event.touches[0];
+            const touchX = touch.clientX;
+            const touchY = touch.clientY;
+
+            // タッチ位置と駒の位置をチェック
+            racers.forEach(racer => {
+                const dx = touchX - racer.x;
+                const dy = touchY - racer.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < 20) {
+                    draggingRacer = racer;
+                }
+            });
+        });
+
+        canvas.addEventListener('touchmove', function(event) {
+            event.preventDefault();
+            if (draggingRacer) {
+                const touch = event.touches[0];
+                draggingRacer.x = touch.clientX;
+                draggingRacer.y = touch.clientY;
+                drawRacers();
+            }
+        });
+
+        canvas.addEventListener('touchend', function() {
+            draggingRacer = null;
+        });
+    </script>
+</body>
+</html>
