@@ -36,21 +36,23 @@
         };
 
         // 駒を描画
-        function drawRacers() {
-            // 競輪場のトラック画像を背景に描画
-            ctx.drawImage(trackImage, 0, 0, canvas.width, canvas.height);
+      function drawRacers() {
+        ctx.drawImage(trackImage, 0, 0, canvas.width, canvas.height);
+    
+        racers.forEach(racer => {
+            let adjustedX = racer.x / originalCanvasWidth * canvas.width;
+            let adjustedY = racer.y / originalCanvasHeight * canvas.height;
 
-            // 駒を描画
-            racers.forEach(racer => {
-                ctx.beginPath();
-                ctx.arc(racer.x, racer.y, 20, 0, Math.PI * 2);
-                ctx.fillStyle = racer.color;
-                ctx.fill();
-                ctx.closePath();
-                ctx.fillStyle = 'black';
-                ctx.fillText(racer.number, racer.x - 5, racer.y + 5);
+            ctx.beginPath();
+            ctx.arc(adjustedX, adjustedY, 20, 0, Math.PI * 2);
+            ctx.fillStyle = racer.color;
+            ctx.fill();
+            ctx.closePath();
+            ctx.fillStyle = 'black';
+            ctx.fillText(racer.number, adjustedX - 5, adjustedY + 5);
             });
-        }
+                }
+
 
         // タッチイベントの処理
         let draggingRacer = null;
