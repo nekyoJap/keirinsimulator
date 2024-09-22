@@ -35,11 +35,14 @@
 
         const canvas = document.getElementById('raceCanvas');
         const ctx = canvas.getContext('2d');
+        let trackImageLoaded = false; // 画像のロードが完了したかを示すフラグ
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            drawRacers();
+            if (trackImageLoaded) {
+                drawRacers();
+            }
         }
 
         window.addEventListener('resize', resizeCanvas);
@@ -49,6 +52,7 @@
         const trackImage = new Image();
         trackImage.src = '/static/images/keirin_track.gif';
         trackImage.onload = function() {
+            trackImageLoaded = true; // 画像がロードされたことを示すフラグをtrueに
             drawRacers(); // 画像ロード後に描画
         };
 
@@ -125,12 +129,4 @@
                 selectedRacer.y = pos.y / canvas.height * originalCanvasHeight;
                 drawRacers();
             }
-        }
-
-        // ドラッグ終了
-        function endDrag() {
-            selectedRacer = null;
-        }
-    </script>
-</body>
-</html>
+       
