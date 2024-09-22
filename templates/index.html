@@ -17,35 +17,48 @@
 
         canvas {
             border: 1px solid black;
-            background: url("/static/images/keirin_track.gif") no-repeat center center;
-            background-size: cover; /* 画面サイズに合わせて画像を拡大 */
+            display: block;
         }
     </style>
 </head>
 <body>
     <canvas id="raceCanvas"></canvas>
     <script>
-        const racers = {{ racers | tojson }};
+        const racers = [
+            { number: 1, color: 'red', x: 100, y: 100 },
+            { number: 2, color: 'blue', x: 200, y: 100 },
+            { number: 3, color: 'green', x: 300, y: 100 }
+        ];
+
         const canvas = document.getElementById('raceCanvas');
         const ctx = canvas.getContext('2d');
+
+        // 背景画像をロード
+        const backgroundImg = new Image();
+        backgroundImg.src = "/static/images/keirin_track.gif";
+        let backgroundLoaded = false;
+
+        backgroundImg.onload = function() {
+            backgroundLoaded = true;
+            resizeCanvas();
+        };
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            racers.forEach((racer, index) => {
-                racer.x = centerX + (index * 50); // 横に並べる
-                racer.y = centerY; // 縦は中央
-            });
             drawRacers();
         }
 
         window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
 
         function drawRacers() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // 背景がロードされたら描画
+            if (backgroundLoaded) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height); // 背景画像を描画
+            }
+
+            // 駒を描画
             racers.forEach(racer => {
                 ctx.beginPath();
                 ctx.arc(racer.x, racer.y, 20, 0, 2 * Math.PI, false);
@@ -101,7 +114,7 @@
                 const pos = evt.type === 'touchmove' ? getTouchPos(evt) : getMousePos(evt);
                 selectedRacer.x = pos.x;
                 selectedRacer.y = pos.y;
-                drawRacers();
+                drawRacers(); // 再描画
             }
         }
 
