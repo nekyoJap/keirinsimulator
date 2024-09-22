@@ -29,6 +29,8 @@
 
         const canvas = document.getElementById('raceCanvas');
         const ctx = canvas.getContext('2d');
+        let canvasWidth = 1920;
+        let canvasHeight = 1080;
 
         // 背景画像をロード
         const backgroundImg = new Image();
@@ -43,6 +45,8 @@
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+            canvasWidth = canvas.width;
+            canvasHeight = canvas.height;
             drawRacers();
         }
 
@@ -57,15 +61,17 @@
 
             // 駒を描画
             racers.forEach(racer => {
+                let adjustedX = racer.x / 1920 * canvas.width; // 1920は元の幅を仮定
+                let adjustedY = racer.y / 1080 * canvas.height; // 1080は元の高さを仮定
                 ctx.beginPath();
-                ctx.arc(racer.x, racer.y, 20, 0, 2 * Math.PI, false);
+                ctx.arc(adjustedX, adjustedY, 20, 0, 2 * Math.PI, false);
                 ctx.fillStyle = racer.color;
                 ctx.fill();
                 ctx.font = '20px Arial';
                 ctx.fillStyle = racer.number === 2 ? 'white' : 'black'; // 2番だけ白文字
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(racer.number, racer.x, racer.y);
+                ctx.fillText(racer.number, adjustedX, adjustedY);
                 ctx.closePath();
             });
         }
@@ -83,8 +89,8 @@
         function getMousePos(evt) {
             const rect = canvas.getBoundingClientRect();
             return {
-                x: evt.clientX - rect.left,
-                y: evt.clientY - rect.top
+                x: (evt.clientX - rect.left) / canvasWidth * 1920,  // 元のスケールに基づいて座標をスケーリング
+                y: (evt.clientY - rect.top) / canvasHeight * 1080
             };
         }
 
@@ -92,8 +98,8 @@
             const rect = canvas.getBoundingClientRect();
             const touch = evt.touches[0];
             return {
-                x: touch.clientX - rect.left,
-                y: touch.clientY - rect.top
+                x: (touch.clientX - rect.left) / canvasWidth * 1920,  // 元のスケールに基づいて座標をスケーリング
+                y: (touch.clientY - rect.top) / canvasHeight * 1080
             };
         }
 
