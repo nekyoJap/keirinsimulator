@@ -24,11 +24,8 @@
 <body>
     <canvas id="raceCanvas"></canvas>
     <script>
-        const racers = [
-            { number: 1, color: 'red', x: 100, y: 100 },
-            { number: 2, color: 'blue', x: 200, y: 100 },
-            { number: 3, color: 'green', x: 300, y: 100 }
-        ];
+        // サーバーサイドから提供されるレーサーデータを使用
+        const racers = {{ racers | tojson }}; // サーバー側で生成されたデータを使用
 
         const canvas = document.getElementById('raceCanvas');
         const ctx = canvas.getContext('2d');
