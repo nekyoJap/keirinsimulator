@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>競輪シミュレーション</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        canvas {
+            border: 1px solid black;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="raceCanvas"></canvas>
+    <script>
+        const originalCanvasWidth = 1920;
+        const originalCanvasHeight = 1080;
+        const racers = {{ racers | tojson }};  // 例: Pythonなどのサーバー側から渡されたデータ
+        
+        const canvas = document.getElementById('raceCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            drawRacers();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // 背景画像を描画
+        const trackImage = new Image();
+        trackImage.src = '/static/images/keirin_track.gif';
+        trackImage.onload = function() {
+            drawRacers(); // 画像ロード後に駒も描画
+        };
+
+        // 駒を描画する関数
+        function drawRacers() {
+            // 背景画像を描画
+            ctx.drawImage(trackImage, 0, 0, canvas.width, canvas.height);
+            
+            // 駒を描画
+            racers.forEach(racer => {
+                let adjustedX = racer.x / originalCanvasWidth * canvas.width;
+                let adjustedY = racer.y / originalCanvasHeight * canvas.height;
+
+                ctx.beginPath();
+                ctx.arc(adjustedX, adjustedY, 20, 0, Math.PI * 2);
+                ctx.fillStyle = racer.color;
+                ctx.fill();
+                ctx.closePath();
+                ctx.fillStyle = racer.number === 2 ? 'white' : 'black'; // 2番だけ白文字
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(racer.number, adjustedX, adjustedY);
+            });
+        }
+
+        // 駒をドラッグ＆ドロップで移動する処理
+        let selectedRacer = null;
+
+        // マウスとタッチイベントの処理
+        canvas.addEventListener('mousedown', startDrag);
+        canvas.addEventListener('touchstart', startDrag);
+        canvas.addEventListener('mousemove', dragRacer);
+        canvas.addEventListener('touchmove', dragRacer);
+        canvas.addEventListener('mouseup', endDrag);
+        canvas.addEventListener('touchend', endDrag);
+
+        // 座標を取得するヘルパー関数
+        function getMousePos(evt) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: evt.clientX - rect.left,
+                y: evt.clientY - rect.top
+            };
+        }
+
+        function getTouchPos(evt) {
+            const rect = canvas.getBoundingClientRect();
+            const touch = evt.touches[0];
+            return {
+                x: touch.clientX - rect.left,
+                y: touch.clientY - rect.top
+            };
+        }
+
+        // 駒を選択する
+        function startDrag(evt) {
+            const pos = evt.type === 'touchstart' ? getTouchPos(evt) : getMousePos(evt);
+            const adjustedX = pos.x / canvas.width * originalCanvasWidth;
+            const adjustedY = pos.y / canvas.height * originalCanvasHeight;
+
+            selectedRacer = racers.find(racer => {
+                const dx = racer.x - adjustedX;
+                const dy = racer.y - adjustedY;
+                return Math.sqrt(dx * dx + dy * dy) < 20;
+            });
+        }
+
+        // 駒を移動させる
+        function dragRacer(evt) {
+            if (selectedRacer) {
+                const pos = evt.type === 'touchmove' ? getTouchPos(evt) : getMousePos(evt);
+                selectedRacer.x = pos.x / canvas.width * originalCanvasWidth;
+                selectedRacer.y = pos.y / canvas.height * originalCanvasHeight;
+                drawRacers();
+            }
+        }
+
+        // ドラッグ終了
+        function endDrag() {
+            selectedRacer = null;
+        }
+    </script>
+</body>
+</html>
