@@ -23,10 +23,16 @@
 <body>
     <canvas id="raceCanvas"></canvas>
     <script>
+        // 仮のレーサーデータをJavaScriptで直接作成します
+        const racers = [
+            { number: 1, color: 'red', x: 100, y: 100 },
+            { number: 2, color: 'blue', x: 200, y: 200 },
+            { number: 3, color: 'green', x: 300, y: 300 }
+        ];
+
         const originalCanvasWidth = 1920;
         const originalCanvasHeight = 1080;
-        const racers = {{ racers | tojson }};  // 例: Pythonなどのサーバー側から渡されたデータ
-        
+
         const canvas = document.getElementById('raceCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -39,18 +45,19 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // 背景画像を描画
+        // 背景画像をロード
         const trackImage = new Image();
         trackImage.src = '/static/images/keirin_track.gif';
         trackImage.onload = function() {
-            drawRacers(); // 画像ロード後に駒も描画
+            drawRacers(); // 画像ロード後に描画
         };
 
-        // 駒を描画する関数
+        // 駒の描画
         function drawRacers() {
             // 背景画像を描画
-            ctx.drawImage(trackImage, 0, 0, canvas.width, canvas.height);
-            
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // キャンバスをクリア
+            ctx.drawImage(trackImage, 0, 0, canvas.width, canvas.height); // 背景画像を描画
+
             // 駒を描画
             racers.forEach(racer => {
                 let adjustedX = racer.x / originalCanvasWidth * canvas.width;
