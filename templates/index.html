@@ -31,8 +31,6 @@
         const ctx = canvas.getContext('2d');
         let canvasWidth = 1920;
         let canvasHeight = 1080;
-        let lastInnerWidth = window.innerWidth;
-        let lastInnerHeight = window.innerHeight;
 
         // 背景画像をロード
         const backgroundImg = new Image();
@@ -45,22 +43,87 @@
         };
 
         function resizeCanvas() {
-            // 実際にウィンドウサイズが変わったときのみ再描画
-            if (window.innerWidth !== lastInnerWidth || window.innerHeight !== lastInnerHeight) {
-                lastInnerWidth = window.innerWidth;
-                lastInnerHeight = window.innerHeight;
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-                canvasWidth = canvas.width;
-                canvasHeight = canvas.height;
-                drawRacers();
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            canvasWidth = canvas.width;
+            canvasHeight = canvas.height;
+            drawRacers();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        function drawRacers() {
+            // 背景がロードされたら描画
+            if (backgroundLoaded) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height); // 背景画像を描画
+            }
+
+            // 駒を描画
+            racers.forEach(racer => {
+                let adjustedX = racer.x / 1920 * canvas.width; // 1920は元の幅を仮定
+                let adjustedY = racer.y / 1080 * canvas.height; // 1080は元の高さを仮定
+                ctx.beginPath();
+                ctx.arc(adjustedX, adjustedY, 20, 0, 2 * Math.PI, false);
+                ctx.fillStyle = racer.color;
+                ctx.fill();
+                ctx.font = '20px Arial';
+                ctx.fillStyle = racer.number === 2 ? 'white' : 'black'; // 2番だけ白文字
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(racer.number, adjustedX, adjustedY);
+                ctx.closePath();
+            });
+        }
+
+        // マウスとタッチ操作のサポート
+        let selectedRacer = null;
+
+        canvas.addEventListener('mousedown', startDrag);
+        canvas.addEventListener('touchstart', startDrag);
+        canvas.addEventListener('mousemove', dragRacer);
+        canvas.addEventListener('touchmove', dragRacer);
+        canvas.addEventListener('mouseup', endDrag);
+        canvas.addEventListener('touchend', endDrag);
+
+        function getMousePos(evt) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: (evt.clientX - rect.left) / canvasWidth * 1920,  // 元のスケールに基づいて座標をスケーリング
+                y: (evt.clientY - rect.top) / canvasHeight * 1080
+            };
+        }
+
+        function getTouchPos(evt) {
+            const rect = canvas.getBoundingClientRect();
+            const touch = evt.touches[0];
+            return {
+                x: (touch.clientX - rect.left) / canvasWidth * 1920,  // 元のスケールに基づいて座標をスケーリング
+                y: (touch.clientY - rect.top) / canvasHeight * 1080
+            };
+        }
+
+        function startDrag(evt) {
+            const pos = evt.type === 'touchstart' ? getTouchPos(evt) : getMousePos(evt);
+            selectedRacer = racers.find(racer => {
+                const dx = racer.x - pos.x;
+                const dy = racer.y - pos.y;
+                return Math.sqrt(dx * dx + dy * dy) < 20;
+            });
+        }
+
+        function dragRacer(evt) {
+            if (selectedRacer) {
+                const pos = evt.type === 'touchmove' ? getTouchPos(evt) : getMousePos(evt);
+                selectedRacer.x = pos.x;
+                selectedRacer.y = pos.y;
+                drawRacers(); // 再描画
             }
         }
 
-        window.addEventListener('resize', () => {
-            // 100ms遅らせて実行することで、ツールバーの表示/非表示の際の一時的なリサイズを避ける
-            setTimeout(resizeCanvas, 100);
-        });
-
-        function drawRacers() {
-            // 背景
+        function endDrag() {
+            selectedRacer = null;
+        }
+    </script>
+</body>
+</html>
